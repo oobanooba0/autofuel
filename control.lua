@@ -48,14 +48,14 @@ script.on_event(
 )
 
 script.on_event(
-  defines.events.on_script_raised_built,
+  defines.events.script_raised_built,
   function(event)
     autofuel.scan_grid(event.entity)
   end,filters
 )
 
 script.on_event(
-  defines.events.on_script_raised_revive,
+  defines.events.script_raised_revive,
   function(event)
     autofuel.scan_grid(event.entity)
   end,filters
@@ -77,6 +77,14 @@ script.on_event(defines.events.on_equipment_inserted,
 	end
 )
 
+--- on tick
+
+script.on_event(
+	defines.events.on_tick,
+	function(event)
+		autofuel.on_tick()
+	end
+)
 
 ----the part where the mod does something
 
