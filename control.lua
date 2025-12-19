@@ -6,12 +6,10 @@ local autofuel = {}
 
 --- init section
 local function make_storage()
-
   if not storage.burners then
     storage.burners = {} end
   if not storage.burner_from_k then
     storage.burner_from_k = {} end
-
 end
 
 script.on_init(function()
@@ -68,8 +66,6 @@ script.on_event(
   end,filters
 )
 
----equipment insert event
-
 --equipment management
 script.on_event(defines.events.on_equipment_inserted,
 	function(event)
@@ -78,17 +74,14 @@ script.on_event(defines.events.on_equipment_inserted,
 )
 
 --- on tick
-
 script.on_event(
 	defines.events.on_tick,
 	function(event)
-		autofuel.on_tick()
+		autofuel.on_tick(event.tick)
 	end
 )
 
 ----the part where the mod does something
-
-
 
 --equipment add/remove events
   --this happens when any vehicle entity is placed
@@ -106,7 +99,6 @@ script.on_event(
     end
   end
 
-
   function autofuel.equipment_inserted(event)
     --gather basic information
     local equipment = event.equipment
@@ -114,8 +106,8 @@ script.on_event(
     if not grid.valid or not equipment.valid or not equipment.burner then return end
     --handle our autofuel list
     if not storage.burners then storage.burners = {} end
-    local burner_list = storage.burners
     local entity = grid.entity_owner
+    if not entity then return end
     local inventory
     if entity.type == "spider-vehicle" then
       inventory = entity.get_inventory(defines.inventory.spider_trunk)
@@ -123,6 +115,8 @@ script.on_event(
       inventory = entity.get_inventory(defines.inventory.car_trunk)
     end
     if not inventory then return end --if we got no inventory on our vehicle, we cant autofuel its grid. so we give up.
+    --add our equipment to the list of equipments we shall check
+    local burner_list = storage.burners
     table.insert(burner_list,{--storing this, because tracking it down later would be way more complicated.
       burner = equipment.burner,
       entity = entity,
@@ -130,54 +124,62 @@ script.on_event(
     })
   end
 
-  function autofuel.on_tick()
+  function autofuel.on_tick(tick)
+    --do vehicles
     storage.burner_from_k = flib_table.for_n_of(
 		  storage.burners, storage.burner_from_k, 1,
       function(equipment,index)
-        autofuel.fuel_burner(equipment,index)
+        autofuel.vehichle_burner(equipment,index)
       end
     )
-    end
+    --do players
+    local players = game.connected_players
+    local player_index = math.fmod(tick,#players)+1 --basically, a dumbass way to sequentially pick one of the connected players to do a check on
+    local player = game.connected_players[player_index]
+    autofuel.fuel_player(player)
+  end
 
-  function autofuel.fuel_burner(equipment,index)
+  function autofuel.vehichle_burner(equipment,index)
     if not equipment.burner.valid then storage.burners[index] = nil return
       --game.print("remove invalid burner")
     end
     if not equipment.entity.valid then storage.burners[index] = nil return
       --game.print("remove burner from invalid entity")
     end
-    local burner = equipment.burner
-    local trunk = equipment.inventory
+    autofuel.fuel_burner(equipment.burner,equipment.inventory)
+  end
+
+  function autofuel.fuel_player(player)
+    local armor_slot = player.get_inventory(defines.inventory.character_armor)
+    if not armor_slot or not armor_slot[1] or not armor_slot[1].valid_for_read or not armor_slot[1].grid then return end
+    local grid = armor_slot[1].grid
+    local inventory = player.get_inventory(defines.inventory.character_main)
+    for _,equipment in pairs(grid.equipment) do
+      if equipment.burner then
+        autofuel.fuel_burner(equipment.burner,inventory)
+      end
+    end
+  end
+
+  function autofuel.fuel_burner(burner,trunk)
     --refuel the burner
     local burner_input = burner.inventory
     if not burner_input.is_full() then
-      local trunk_contents = trunk.get_contents()
-      for _,trunk_item in pairs(trunk_contents) do  
-        if burner.fuel_categories[prototypes.item[trunk_item.name].fuel_category] then --precaching compatible fuels would probably be faster, but i dont care.
-          local item_room = burner_input.get_insertable_count(trunk_item)
-          local item_quantity = trunk_item.count
-          local transfer_limit = math.min(item_quantity,item_room)
-          if transfer_limit > 0 then
-            local transfer = {name = trunk_item.name, count = transfer_limit, quality = trunk_item.quality}
-            trunk.remove(transfer)
-            burner_input.insert(transfer)
-          end
-        end
-      end
+      autofuel.transfer(trunk,burner_input)
     end
     --dump the junk in de trunk
     local burner_output = burner.burnt_result_inventory
-    if burner_output then
-      local burner_out = burner_output.get_contents()
-      for _,burnt_fuel in pairs(burner_out) do
-        local item_room = trunk.get_insertable_count(burnt_fuel)
-        local item_quantity = burnt_fuel.count
-        local transfer_limit = math.min(item_quantity,item_room)
-        if transfer_limit > 0 then
-          local transfer = {name = burnt_fuel.name, count = transfer_limit, quality = burnt_fuel.quality}
-          burner_output.remove(transfer)
-          trunk.insert(transfer)
-        end
+    if burner_output and not burner_output.is_empty() then
+      autofuel.transfer(burner_output,trunk)
+    end
+  end
+
+  function autofuel.transfer(source,destination)--transfers whatever items it can into another inventory
+    --script from nbcss
+    for i = 1, #source do
+      local source_stack = source[i]
+      if source_stack.valid_for_read then
+        source_stack.count = source_stack.count - destination.insert(source_stack)
       end
     end
   end
