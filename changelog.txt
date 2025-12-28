@@ -1,4 +1,12 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.0
+Date: 2025-12-28
+  Changes:
+    - Autofuel now only refuels one player equipment grid item per tick, instaid of trying all of them. (this may cause a little jank when using 2 different equipment grid power sources that use 2 different fuel categories, but like, come on. big performance gains)
+    - Some misc script improvements that should, hopefully, lead to better performance.
+  Bugfixes:
+    - having blueprint books in your inventory (like some kind of monster) no longer causes insane lag.
+---------------------------------------------------------------------------------------------------
 Version: 1.1.0
 Date: 2025-12-19
   Major Features:

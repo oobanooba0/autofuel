@@ -10,6 +10,8 @@ local function make_storage()
     storage.burners = {} end
   if not storage.burner_from_k then
     storage.burner_from_k = {} end
+  if not storage.player_grids then
+    storage.player_grids = {} end
 end
 
 script.on_init(function()
@@ -156,7 +158,7 @@ script.on_event(
     local inventory = player.get_inventory(defines.inventory.character_main)
     for _,equipment in pairs(grid.equipment) do
       if equipment.burner then
-        autofuel.fuel_burner(equipment.burner,inventory)
+        if autofuel.fuel_burner(equipment.burner,inventory) then return end
       end
     end
   end
@@ -164,21 +166,24 @@ script.on_event(
   function autofuel.fuel_burner(burner,trunk)
     --refuel the burner
     local burner_input = burner.inventory
+    local took_action = false
     if not burner_input.is_full() then
       autofuel.transfer(trunk,burner_input)
+      took_action = true
     end
     --dump the junk in de trunk
     local burner_output = burner.burnt_result_inventory
     if burner_output and not burner_output.is_empty() then
       autofuel.transfer(burner_output,trunk)
+      took_action = true
     end
-  end
+    return took_action end
 
   function autofuel.transfer(source,destination)--transfers whatever items it can into another inventory
-    --script from nbcss
+    --script from nbcss. this is doomed i think
     for i = 1, #source do
       local source_stack = source[i]
-      if source_stack.valid_for_read then
+      if source_stack.valid_for_read and source_stack.type == "item" then
         source_stack.count = source_stack.count - destination.insert(source_stack)
       end
     end
