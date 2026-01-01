@@ -136,6 +136,7 @@ script.on_event(
     )
     --do players
     local players = game.connected_players
+    if #players == 0 then return end --in case no players are in the game.
     local player_index = math.fmod(tick,#players)+1 --basically, a dumbass way to sequentially pick one of the connected players to do a check on
     local player = game.connected_players[player_index]
     autofuel.fuel_player(player)
