@@ -169,23 +169,31 @@ script.on_event(
     local burner_input = burner.inventory
     local took_action = false
     if not burner_input.is_full() then
-      autofuel.transfer(trunk,burner_input)
-      took_action = true
+      if autofuel.transfer(trunk,burner_input) then
+        took_action = true
+      elseif burner_input.find_empty_stack() then--in case the transfer moved no items, we need to know if its because the slots were occupied by items that it cant stack onto, or if its actually empty.
+        took_action = true
+      end
+
     end
     --dump the junk in de trunk
     local burner_output = burner.burnt_result_inventory
     if burner_output and not burner_output.is_empty() then
-      autofuel.transfer(burner_output,trunk)
-      took_action = true
+      if autofuel.transfer(burner_output,trunk) then
+        took_action = true
+      end
     end
     return took_action end
 
-  function autofuel.transfer(source,destination)--transfers whatever items it can into another inventory
-    --script from nbcss. this is doomed i think
-    for i = 1, #source do
+  function autofuel.transfer(source,destination)--transfers items into an inventory like shift clicking, the first successful attempt quick ends the script.
+    --script from nbcss, then modified beyond recognition
+    local v,empty_stack = source.find_empty_stack() --finds the slot number of the first empty, unfiltered slot. This will be the highest slot number we check.
+    for i = 1, empty_stack or #source do
       local source_stack = source[i]
       if source_stack.valid_for_read and source_stack.type == "item" then
-        source_stack.count = source_stack.count - destination.insert(source_stack)
+        local transfered = destination.insert(source_stack)
+        source_stack.count = source_stack.count - transfered
+        if transfered > 0 then return true end --if we move any items at all, just quit the script. This will make it so that this function finishes early if it successfully moves any items.
       end
     end
   end

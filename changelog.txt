@@ -1,4 +1,13 @@
 ---------------------------------------------------------------------------------------------------
+Version: 1.2.2
+Date: ????
+  Changes:
+    - autofuel now stops trying to transfer items after it already has. meaning once its moved a stack of coal into a generator, it now wont also then still try to check every other item you happen to have in your inventory (This does mean that mean having fuel in your fist slot is best for performance)
+    - autofuel will stop trying to transfer items once it reaches the first empty (and unfiltered) inventory slot. this means that players with massive empty inventories no longer have a big performance impact. If that inventory is full, however, the performance impact will be similar to old levels. Autofuel still has to check every item if it can be used as fuel.
+    - A side effect of this is that if your inventory is unsorted (which shouldnt be the case without mods) the script wont be able to find any fuel after an empty slot. (So if you intentionally set inventory filters to create empty slots, that might be an issue, but I don't imagine any person sound of mind does that.)
+  Bugfixes:
+    - Autofuel script will now make sure it actually has transfered any items before considering its work done. This solves an issue where when using multiple different fuel types. Still. autofuel works best if you stick to one fuel, and make sure you have enough.
+---------------------------------------------------------------------------------------------------
 Version: 1.2.1
 Date: 2026-01-01
   Bugfixes:
