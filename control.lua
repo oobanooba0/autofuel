@@ -64,7 +64,7 @@ script.on_event(
 script.on_event(
   defines.events.on_entity_cloned,
   function(event)
-    autofuel.scan_grid(event.entity)
+    autofuel.scan_grid(event.destination)--on entity cloned just had to be different.
   end,filters
 )
 
