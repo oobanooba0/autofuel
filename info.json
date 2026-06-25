@@ -3,9 +3,9 @@
   "version": "1.2.3",
   "title": "Autofuel - Refill equipment grid fuel automatically",
   "author": "oobanooba",
-  "factorio_version": "2.0",
+  "factorio_version": "2.1",
   "dependencies": [
-    "base >= 2.0.72",
+    "base >= 2.1.7",
     "flib >= 0.16.5"
   ],
   "description": "A simple mod with a simple purpose; to refill equipment grids automatically"
