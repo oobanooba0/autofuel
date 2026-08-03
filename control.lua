@@ -1,6 +1,6 @@
 --fuck it, its all under control.
 
-local TFMG_table = require("__TFMG-lib__/TFMG_table.lua")
+local TFMG_table = require("__TFMG-lib__/control/TFMG_table.lua")
 
 local autofuel = {}
 
