@@ -1,6 +1,6 @@
 --fuck it, its all under control.
 
-local flib_table = require("__flib__/table")
+local TFMG_table = require("__TFMG-lib__/TFMG_table.lua")
 
 local autofuel = {}
 
@@ -128,7 +128,7 @@ script.on_event(
 
   function autofuel.on_tick(tick)
     --do vehicles
-    storage.burner_from_k = flib_table.for_n_of(
+    storage.burner_from_k = TFMG_table.for_n(
 		  storage.burners, storage.burner_from_k, 1,
       function(equipment,index)
         autofuel.vehichle_burner(equipment,index)

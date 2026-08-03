@@ -6,7 +6,7 @@
   "factorio_version": "2.1",
   "dependencies": [
     "base >= 2.1.7",
-    "flib >= 0.16.5"
+    "TFMG-lib >= 0.5.0"
   ],
   "description": "A simple mod with a simple purpose; to refill equipment grids automatically"
 }
